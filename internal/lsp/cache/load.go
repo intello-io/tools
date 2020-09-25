@@ -134,6 +134,21 @@ func (s *snapshot) load(ctx context.Context, scopes ...interface{}) error {
 		if !containsDir || s.view.Options().VerboseOutput {
 			event.Log(ctx, "go/packages.Load", tag.Snapshot.Of(s.ID()), tag.PackagePath.Of(pkg.PkgPath), tag.Files.Of(pkg.CompiledGoFiles))
 		}
+
+		// Intello Patch Start >>
+		// Do not add graphql/generated.go files to gopls
+		if pkg.Name == "graphql" {
+			newSlice := []string{}
+			for _, s := range pkg.CompiledGoFiles {
+				// Skip adding `generated.go` files in the `graphql` package
+				if !strings.HasSuffix(s, "generated.go") {
+					newSlice = append(newSlice, s)
+				}
+			}
+			pkg.CompiledGoFiles = newSlice
+		}
+		// << Intello Patch End
+
 		// Ignore packages with no sources, since we will never be able to
 		// correctly invalidate that metadata.
 		if len(pkg.GoFiles) == 0 && len(pkg.CompiledGoFiles) == 0 {
