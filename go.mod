@@ -1,4 +1,4 @@
-module golang.org/intello-io/tools
+module github.com/intello-io/tools
 
 go 1.12
 
